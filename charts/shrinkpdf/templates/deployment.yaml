@@ -19,14 +19,22 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           ports:
             - containerPort: 5000
+          # Liveness : Est-ce que le processus Python a crashé ?
           livenessProbe:
             httpGet:
               path: /health
               port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            failureThreshold: 3
+          # Readiness : Est-ce que l'app peut compresser un PDF ?
           readinessProbe:
             httpGet:
-              path: /health
+              path: /ready
               port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 2
           volumeMounts:
             - mountPath: /tmp
               name: temp-volume

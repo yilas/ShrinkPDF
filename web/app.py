@@ -359,7 +359,21 @@ def compress():
         "file_data": final_file_data
     })
 
-# Health Check Endpoint
+# Metrics Endpoint
+@app.route('/metrics')
+def metrics():
+    """Point de terminaison pour les métriques (ex: Prometheus)."""
+    http_code = 200
+    metrics = { }
+    return metrics , http_code
+
+# Readyness probe
+@app.route('/ready')
+def readiness():
+    """Vérification minimale : le serveur Flask répond."""
+    return "OK", 200
+
+# Health Check Endpoint / Liveness probe
 @app.route('/health')
 def health_check():
     health_status = {
