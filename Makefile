@@ -46,7 +46,7 @@ load: build
 	kind load docker-image $(IMAGE_NAME):$(TAG) --name $(CLUSTER_NAME)
 
 # Déploiement via Helm
-deploy: load
+deploy:
 	@echo "--- Deploying Helm chart ---"
 	helm upgrade shrink $(CHART_PATH) --install \
 		--namespace $(NAMESPACE) \
