@@ -4,6 +4,7 @@ TAG = 1.2.0
 CLUSTER_NAME = k8s-shrink
 CHART_PATH = ./charts/shrinkpdf
 NAMESPACE = inis-tools-pdf
+CILIUM_VERSION = 1.18.5
 
 .PHONY: all setup build load deploy logs clean test proxy
 
@@ -12,10 +13,27 @@ all: setup build load deploy
 
 # Création du cluster Kind
 setup:
-	@echo "--- Creating Kind cluster $(CLUSTER_NAME) ---"
-	kind create cluster --name $(CLUSTER_NAME)
-	@echo "--- Switching context to $(CLUSTER_NAME) ---"
-	kubectl config use-context kind-$(CLUSTER_NAME)
+	@echo "--- Creating Kind cluster without CNI ---"
+	kind create cluster --name $(CLUSTER_NAME) --config dev/kind-config.yaml
+
+	@echo "--- Adding Cilium Helm Repo ---"
+	helm repo add cilium https://helm.cilium.io/
+	helm repo update
+
+	@echo "--- Installing Gateway API CRDs ---"
+	kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/standard-install.yaml
+
+	@echo "--- Installing Cilium with Gateway API support ---"
+	helm install cilium cilium/cilium --version $(CILIUM_VERSION) \
+	  --namespace kube-system \
+	  --set kubeProxyMode=replaced \
+	  --set k8sServiceHost=$(CLUSTER_NAME)-control-plane \
+	  --set k8sServicePort=6443 \
+	  --set gatewayAPI.enabled=true \
+	  --set operator.replicas=1
+
+	@echo "--- Waiting for Cilium to be ready ---"
+	kubectl wait --namespace kube-system --for=condition=ready pod -l k8s-app=cilium --timeout=120s
 
 # Build de l'image Docker (Multi-stage)
 build:
@@ -51,4 +69,4 @@ logs:
 clean:
 	@echo "--- Deleting cluster and cleaning Docker ---"
 	kind delete cluster --name $(CLUSTER_NAME)
-	docker rmi $(IMAGE_NAME):$(TAG) || true
+# 	docker rmi $(IMAGE_NAME):$(TAG) || true
