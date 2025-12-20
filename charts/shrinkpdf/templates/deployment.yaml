@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shrinkpdf.fullname" . }}
+  labels:
+    {{- include "shrinkpdf.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "shrinkpdf.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "shrinkpdf.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          ports:
+            - containerPort: 5000
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+          volumeMounts:
+            - mountPath: /tmp
+              name: temp-volume
+      volumes:
+        - name: temp-volume
+          emptyDir: {}

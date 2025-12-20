@@ -1,0 +1,38 @@
+replicaCount: 1
+
+image:
+  repository: yilas/shrinkpdf
+  pullPolicy: Always
+  tag: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+httpRoute:
+  enabled: false
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
