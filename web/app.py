@@ -359,6 +359,44 @@ def compress():
         "file_data": final_file_data
     })
 
+# Health Check Endpoint
+@app.route('/health')
+def health_check():
+    health_status = {
+        "status": "UP",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "checks": []
+    }
+
+    # 1. Vérification Ghostscript
+    gs_cmd = get_ghostscript_command()
+    if gs_cmd:
+        health_status["checks"].append({"component": "ghostscript", "status": "OK"})
+    else:
+        health_status["status"] = "DOWN"
+        health_status["checks"].append({"component": "ghostscript", "status": "NOT_FOUND"})
+
+    # 2. Vérification droits d'écriture sur le dossier temporaire
+    if os.access(APP_TEMP_DIR, os.W_OK):
+        health_status["checks"].append({"component": "storage_write", "status": "OK"})
+    else:
+        health_status["status"] = "DOWN"
+        health_status["checks"].append({"component": "storage_write", "status": "READ_ONLY"})
+
+    # 3. Vérification Espace Disque (seuil de 50MB)
+    total, used, free = shutil.disk_usage(APP_TEMP_DIR)
+    free_mb = free // (1024 * 1024)
+    if free_mb > 50:
+        health_status["checks"].append({"component": "storage_space", "status": "OK", "free_mb": free_mb})
+    else:
+        health_status["status"] = "DEGRADED"
+        health_status["checks"].append({"component": "storage_space", "status": "LOW", "free_mb": free_mb})
+
+    # Code HTTP : 200 si tout va bien, 503 si DOWN
+    http_code = 200 if health_status["status"] != "DOWN" else 503
+
+    return jsonify(health_status), http_code
+
 if __name__ == '__main__':
     print("--- Serveur Démarré ---")
     print("Logs: activity.log (Format JSON)")
