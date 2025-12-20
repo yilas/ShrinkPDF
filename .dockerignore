@@ -1,0 +1,21 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env
+
+# Application & Logs
+activity.log
+temp_uploads/
+*.pdf
+*.zip
+
+# Kubernetes & Docker
+deployment.yaml
+Dockerfile
