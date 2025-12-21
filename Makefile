@@ -61,7 +61,7 @@ proxy:
 	@echo "--- Proxy available at http://localhost:8080 ---"
 	kubectl port-forward services/shrink-shrinkpdf 8080:80
 
-# Affichage des logs en direct
+# Affichage des logs
 logs:
 	@echo "--- Streaming logs ---"
 	kubectl logs -f -l app.kubernetes.io/name=shrinkpdf
