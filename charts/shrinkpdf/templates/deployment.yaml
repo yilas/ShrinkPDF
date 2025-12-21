@@ -17,9 +17,25 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          env:
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: K8S_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: K8S_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
           ports:
             - containerPort: 5000
-          # Liveness : Est-ce que le processus Python a crashé ?
           livenessProbe:
             httpGet:
               path: /health
@@ -27,7 +43,6 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 30
             failureThreshold: 3
-          # Readiness : Est-ce que l'app peut compresser un PDF ?
           readinessProbe:
             httpGet:
               path: /ready

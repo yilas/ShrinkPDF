@@ -13,7 +13,7 @@ all: setup build load deploy
 
 # Création du cluster Kind
 setup:
-	@echo "--- Creating Kind cluster without CNI ---"
+	@echo "--- Creating Kind cluster w/o CNI ---"
 	kind create cluster --name $(CLUSTER_NAME) --config dev/kind-config.yaml
 
 	@echo "--- Adding Cilium Helm Repo ---"
@@ -41,6 +41,7 @@ build:
 	docker build -t $(IMAGE_NAME):$(TAG) .
 
 # Chargement de l'image dans Kind
+## to do : ajouter une vraie registry locale
 load: build
 	@echo "--- Loading image into Kind cluster $(CLUSTER_NAME) ---"
 	kind load docker-image $(IMAGE_NAME):$(TAG) --name $(CLUSTER_NAME)
@@ -58,7 +59,7 @@ deploy:
 # Accès à l'interface (Port-forward)
 proxy:
 	@echo "--- Proxy available at http://localhost:8080 ---"
-	kubectl port-forward svc/shrink-shrinkpdf 8080:80
+	kubectl port-forward services/shrink-shrinkpdf 8080:80
 
 # Affichage des logs en direct
 logs:
@@ -69,4 +70,4 @@ logs:
 clean:
 	@echo "--- Deleting cluster and cleaning Docker ---"
 	kind delete cluster --name $(CLUSTER_NAME)
-# 	docker rmi $(IMAGE_NAME):$(TAG) || true
+ 	docker rmi $(IMAGE_NAME):$(TAG) || true

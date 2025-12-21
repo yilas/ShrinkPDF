@@ -1,8 +1,16 @@
+# Lib pour le serveur we
 flask
 pypdf
 pymupdf
+
+# Lib pour OpenTelemetry
 opentelemetry-api
 opentelemetry-sdk
 opentelemetry-instrumentation-flask
 opentelemetry-exporter-otlp
+
+# Lib pour serveur
 gunicorn
+
+# Lib pour infos sur pods
+psutil

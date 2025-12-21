@@ -9,6 +9,8 @@ import logging
 import json
 import base64
 import io
+import psutil
+import platform
 from datetime import datetime, timezone
 import fitz  # PyMuPDF
 
@@ -363,6 +365,7 @@ def compress():
 @app.route('/metrics')
 def metrics():
     """Point de terminaison pour les métriques (ex: Prometheus)."""
+    """TO BE DONE"""
     http_code = 200
     metrics = { }
     return metrics , http_code
@@ -410,6 +413,35 @@ def health_check():
     http_code = 200 if health_status["status"] != "DOWN" else 503
 
     return jsonify(health_status), http_code
+
+@app.route('/health-dbg')
+def health_debug():
+    """Route de diagnostic détaillée."""
+    process = psutil.Process(os.getpid())
+
+    debug_info = {
+        "status": "UP",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "kubernetes": {
+            "node_name": os.getenv("K8S_NODE_NAME", "unknown"),
+            "pod_name": os.getenv("K8S_POD_NAME", "unknown"),
+            "pod_ip": os.getenv("K8S_POD_IP", "unknown"),
+            "namespace": os.getenv("K8S_NAMESPACE", "unknown")
+        },
+        "system": {
+            "os": platform.system(),
+            "python_version": platform.python_version(),
+            "cpu_count": psutil.cpu_count(),
+            "load_avg": psutil.getloadavg() if hasattr(os, 'getloadavg') else "N/A"
+        },
+        "process_memory": {
+            "rss_mb": process.memory_info().rss // (1024 * 1024),
+            "vms_mb": process.memory_info().vms // (1024 * 1024),
+            "percent": process.memory_percent()
+        }
+    }
+    return jsonify(debug_info), 200
+
 
 if __name__ == '__main__':
     print("--- Serveur Démarré ---")
