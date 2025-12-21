@@ -4,7 +4,46 @@ name: k8s-shrink
 networking:
   disableDefaultCNI: true
   kubeProxyMode: none
+
+containerdConfigPatches:
+- |-
+  [plugins."io.containerd.grpc.v1.cri".registry]
+    config_path = "/etc/containerd/certs.d"
+
 nodes:
 - role: control-plane
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    preKubeadmCommands:
+      - mkdir -p /etc/containerd/certs.d/localhost:5000
+      - |
+        cat <<EOF > /etc/containerd/certs.d/localhost:5000/hosts.toml
+        server = "http://zot.inis-registry.svc.cluster.local:5000"
+        [host."http://zot.inis-registry.svc.cluster.local:5000"]
+          capabilities = ["pull", "resolve"]
+        EOF
 - role: worker
+  kubeadmConfigPatches:
+  - |
+    kind: JoinConfiguration
+    preKubeadmCommands:
+      - mkdir -p /etc/containerd/certs.d/localhost:5000
+      - |
+        cat <<EOF > /etc/containerd/certs.d/localhost:5000/hosts.toml
+        server = "http://zot.inis-registry.svc.cluster.local:5000"
+        [host."http://zot.inis-registry.svc.cluster.local:5000"]
+          capabilities = ["pull", "resolve"]
+        EOF
 - role: worker
+  kubeadmConfigPatches:
+  - |
+    kind: JoinConfiguration
+    preKubeadmCommands:
+      - mkdir -p /etc/containerd/certs.d/localhost:5000
+      - |
+        cat <<EOF > /etc/containerd/certs.d/localhost:5000/hosts.toml
+        server = "http://zot.inis-registry.svc.cluster.local:5000"
+        [host."http://zot.inis-registry.svc.cluster.local:5000"]
+          capabilities = ["pull", "resolve"]
+        EOF

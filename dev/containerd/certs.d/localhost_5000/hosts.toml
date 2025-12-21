@@ -1,0 +1,4 @@
+server = "http://zot.inis-registry.svc.cluster.local:5000"
+
+[host."http://zot.inis-registry.svc.cluster.local:5000"]
+  capabilities = ["pull", "resolve"]

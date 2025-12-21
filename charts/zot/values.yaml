@@ -1,0 +1,19 @@
+service:
+  type: ClusterIP
+  port: 5555
+
+# On désactive l'authentification pour le dev local
+zotConfig:
+  http:
+    address: 0.0.0.0
+    port: 5555
+  storage:
+    rootDirectory: /var/lib/zot
+  log:
+    level: info
+
+# On utilise un volume temporaire ou persistant
+persistence:
+  enabled: true
+  size: 2Gi
+  # Dans Kind, cela utilisera le storage provisioner par défaut (local-path)
