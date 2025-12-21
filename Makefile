@@ -8,7 +8,7 @@ CILIUM_VERSION = 1.18.5
 
 .PHONY: all setup build load deploy logs clean test proxy
 
-# Commande par défaut : setup, build, load et deploy
+# All => setup, build, load et deploy
 all: setup build load deploy
 
 # Création du cluster Kind
