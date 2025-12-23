@@ -1,0 +1,15 @@
+# charts/zot/gateway.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: zot-gateway
+  namespace: inis-registry
+spec:
+  gatewayClassName: cilium # Indique à Cilium de piloter cette Gateway
+  listeners:
+  - name: http
+    port: 5001
+    protocol: HTTP
+    allowedRoutes:
+      namespaces:
+        from: Same

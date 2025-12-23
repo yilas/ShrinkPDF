@@ -50,10 +50,10 @@ setup-infra:
 
 	### /!\ Ouvrir issue pour prise en compte de httproute dans https://github.com/project-zot/helm-charts ?
 	@echo "--- Applying Zot HTTPRoute ---"
-	kubectl apply -f charts/zot/zot-route.yaml
+	kubectl apply -n $(NAMESPACE_REGISTRY) -f charts/zot/zot-route.yaml
 
-	@echo "--- Cat the hosts.toml ---"
-	docker exec -it k8s-shrink-worker cat /etc/containerd/certs.d/localhost:5555/hosts.toml
+# 	@echo "--- Cat the hosts.toml ---"
+# 	docker exec -it k8s-shrink-worker cat /etc/containerd/certs.d/localhost:5555/hosts.toml
 
 	@echo "--- Checking Zot DNS resolution from inside the cluster nodes ---"
 	# On teste sur le control-plane, mais on pourrait boucler sur les workers
